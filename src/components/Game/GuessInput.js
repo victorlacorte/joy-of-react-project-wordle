@@ -1,7 +1,7 @@
 import React from "react";
 
 function GuessInput(props) {
-  const { onSubmit } = props;
+  const { onSubmit, isDisabled } = props;
 
   const [guess, setGuess] = React.useState("");
 
@@ -26,6 +26,7 @@ function GuessInput(props) {
         title="5 letter word"
         required={true}
         value={guess}
+        disabled={isDisabled}
         onChange={handleChange}
       />
     </form>

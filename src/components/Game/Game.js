@@ -1,6 +1,6 @@
 import React from "react";
 
-import { CHARS_PER_GUESS, NUM_OF_GUESSES_ALLOWED } from "../../constants";
+import { charsPerGuess, allowedGuesses } from "../../constants";
 import { sample } from "../../utils";
 import { WORDS } from "../../data";
 
@@ -8,40 +8,55 @@ import GuessInput from "./GuessInput";
 import GuessResults from "./GuessResults";
 import HappyBanner from "./HappyBanner";
 import SadBanner from "./SadBanner";
+import Keyboard from "./Keyboard";
 
-// Pick a random word on every pageload.
-const answer = sample(WORDS);
-// To make debugging easier, we'll log the solution in the console.
-console.info({ answer });
+function generateInitialGuesses() {
+  return Array.from({ length: allowedGuesses }, () => ({
+    id: crypto.randomUUID(),
+    label: " ".repeat(charsPerGuess),
+  }));
+}
 
-const initialGuesses = Array.from({ length: NUM_OF_GUESSES_ALLOWED }, () => ({
-  id: crypto.randomUUID(),
-  label: " ".repeat(CHARS_PER_GUESS),
-}));
+function generateAnswer() {
+  return sample(WORDS);
+}
 
 function Game() {
-  const [guesses, setGuesses] = React.useState(() => initialGuesses);
-  const [guessIndex, setGuessIndex] = React.useState(0);
+  const [answer, setAnswer] = React.useState(generateAnswer);
+  const [guesses, setGuesses] = React.useState(generateInitialGuesses);
+  const [numGuesses, setNumGuesses] = React.useState(0);
 
-  const hasWon = guessIndex > 0 ? guesses[guessIndex - 1].label === answer : false;
-  const hasLost = guessIndex == NUM_OF_GUESSES_ALLOWED;
+  // To make debugging easier, we'll log the solution in the console.
+  console.info({ answer });
+
+  const hasWon =
+    numGuesses > 0 ? guesses[numGuesses - 1].label === answer : false;
+
+  const hasLost = numGuesses == allowedGuesses;
 
   function setGuess(guess) {
     if (hasLost) return;
 
     const guessesCp = [...guesses];
-    guessesCp[guessIndex].label = guess;
+    guessesCp[numGuesses].label = guess;
 
-    setGuessIndex(guessIndex + 1);
+    setNumGuesses(numGuesses + 1);
     setGuesses(guessesCp);
+  }
+
+  function restart() {
+    setAnswer(generateAnswer());
+    setGuesses(generateInitialGuesses());
+    setNumGuesses(0);
   }
 
   return (
     <>
       <GuessResults answer={answer} guesses={guesses} />
-      <GuessInput onSubmit={setGuess} />
-      {hasWon && <HappyBanner numGuesses={guessIndex} />}
-      {hasLost && <SadBanner answer={answer} />}
+      <GuessInput onSubmit={setGuess} isDisabled={hasWon || hasLost} />
+      <Keyboard answer={answer} guesses={guesses} />
+      {hasWon && <HappyBanner numGuesses={numGuesses} onRestart={restart} />}
+      {hasLost && <SadBanner answer={answer} onRestart={restart} />}
     </>
   );
 }
