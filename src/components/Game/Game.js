@@ -6,6 +6,8 @@ import { WORDS } from "../../data";
 
 import GuessInput from "./GuessInput";
 import GuessResults from "./GuessResults";
+import HappyBanner from "./HappyBanner";
+import SadBanner from "./SadBanner";
 
 // Pick a random word on every pageload.
 const answer = sample(WORDS);
@@ -21,8 +23,11 @@ function Game() {
   const [guesses, setGuesses] = React.useState(() => initialGuesses);
   const [guessIndex, setGuessIndex] = React.useState(0);
 
+  const hasWon = guessIndex > 0 ? guesses[guessIndex - 1].label === answer : false;
+  const hasLost = guessIndex == NUM_OF_GUESSES_ALLOWED;
+
   function setGuess(guess) {
-    if (guessIndex == NUM_OF_GUESSES_ALLOWED) return;
+    if (hasLost) return;
 
     const guessesCp = [...guesses];
     guessesCp[guessIndex].label = guess;
@@ -35,6 +40,8 @@ function Game() {
     <>
       <GuessResults answer={answer} guesses={guesses} />
       <GuessInput onSubmit={setGuess} />
+      {hasWon && <HappyBanner numGuesses={guessIndex} />}
+      {hasLost && <SadBanner answer={answer} />}
     </>
   );
 }
