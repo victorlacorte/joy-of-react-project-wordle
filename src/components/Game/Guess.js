@@ -1,15 +1,23 @@
 import React from "react";
 
+import { checkGuess } from "../../game-helpers";
+
 function Guess(props) {
-  const { label } = props;
+  const { guess, answer } = props;
+
+  const checked = checkGuess(guess, answer);
 
   return (
     <p className="guess">
-      {Array.from(label).map((letter, index) => (
-        <span key={index} className="cell">
-          {letter}
-        </span>
-      ))}
+      {Array.from(guess).map((letter, index) => {
+        const status = letter === " " ? "" : checked[index].status;
+
+        return (
+          <span key={index} className={`cell ${status}`}>
+            {letter}
+          </span>
+        );
+      })}
     </p>
   );
 }
